@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="AZN.TodoistClient.IntegrationTest/AZN.TodoistClient.IntegrationTest.csproj" Id="7f030400-1cb8-4ac4-a244-622623d78503" />
+  <Project Path="AZN.TodoistClient/AZN.TodoistClient.csproj" />
+</Solution>
