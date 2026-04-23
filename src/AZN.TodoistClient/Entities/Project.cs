@@ -71,5 +71,5 @@ public class Project
     /// The project's URL.
     /// </summary>
     [JsonPropertyName("url")]
-    public required Uri Url { get; set; }
+    public Uri? Url { get; set; }
 }

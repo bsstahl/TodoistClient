@@ -29,14 +29,12 @@ public class Engine : IDisposable
     {
         _config = config;
 
-        var token = this.GetApiToken();
         _client = new HttpClient()
         {
             BaseAddress = Engine.BaseUrl
         };
-
         _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this.GetApiToken());
     }
 
     /// <summary>
@@ -55,25 +53,13 @@ public class Engine : IDisposable
     #region Public API Methods
 
     /// <summary>
-    /// Retrieves project updates from the Todoist API using the provided sync token.
-    /// </summary>
-    /// <param name="syncToken">The sync token used to request incremental updates. Use "*" (default) to request a full sync.</param>
-    /// <returns>
-    /// A task that resolves to a GetProjectUpdatesApiResults containing project update items and the resulting sync token.
-    /// </returns>
-    public async Task<GetProjectUpdatesApiResults> GetProjectUpdates(string syncToken = "*")
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
     /// Retrieves task updates from the Todoist API using the provided sync token.
     /// </summary>
     /// <param name="syncToken">The sync token used to request incremental updates. Use "*" (default) to request a full sync.</param>
     /// <returns>A task that resolves to a GetTaskUpdatesApiResults containing update items and the resulting sync token.</returns>
-    public async Task<GetTaskUpdatesApiResults> GetTaskUpdates(string syncToken = "*")
+    public async Task<GetSyncApiResults> GetSyncUpdates(string syncToken = "*")
     {
-        const string resourceTypesValue = "[\"items\"]";
+        const string resourceTypesValue = "[\"items\",\"projects\"]";
 
         var form = new Dictionary<string, string>
         {
@@ -90,8 +76,8 @@ public class Engine : IDisposable
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        var result = JsonSerializer.Deserialize<GetTaskUpdatesApiResults>(json);
-        return result ?? new GetTaskUpdatesApiResults() { SyncToken = string.Empty }; 
+        var result = JsonSerializer.Deserialize<GetSyncApiResults>(json);
+        return result ?? new GetSyncApiResults() { SyncToken = string.Empty }; 
     }
 
     /// <summary>
@@ -147,7 +133,7 @@ public class Engine : IDisposable
     private async Task<GetProjectApiResults?> GetPageOfProjects(string? nextCursor)
     {
         var parameterizedUrl = string.IsNullOrWhiteSpace(nextCursor)
-            ? $"projects" : $"projects?cursor={nextCursor}";
+            ? $"{Engine.BaseUrl}projects" : $"{Engine.BaseUrl}projects?cursor={nextCursor}";
         var json = await _client.GetStringAsync(new Uri(parameterizedUrl)).ConfigureAwait(false);
         return JsonSerializer.Deserialize<Entities.GetProjectApiResults>(json);
     }
@@ -155,7 +141,7 @@ public class Engine : IDisposable
     private async Task<GetTaskApiResults?> GetPageOfTasks(string? nextCursor = null)
     {
         var fullUrl = string.IsNullOrWhiteSpace(nextCursor)
-            ? "tasks" : $"tasks?cursor={nextCursor}";
+            ? $"{Engine.BaseUrl}tasks" : $"{Engine.BaseUrl}tasks?cursor={nextCursor}";
         var json = await _client.GetStringAsync(new Uri(fullUrl)).ConfigureAwait(false);
         return JsonSerializer.Deserialize<Entities.GetTaskApiResults>(json);
     }

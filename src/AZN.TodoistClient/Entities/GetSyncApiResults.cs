@@ -1,13 +1,14 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AZN.TodoistClient.Entities;
 
 /// <summary>
-/// Represents the results returned by the Todoist API when requesting task updates.
+/// Represents the results returned by the Todoist API when requesting project updates.
 /// Contains information about whether a full sync was performed, the sync timestamp,
-/// the list of item updates, and the sync token for subsequent requests.
+/// the list of project updates, and the sync token for subsequent requests.
 /// </summary>
-public class GetTaskUpdatesApiResults
+public class GetSyncApiResults
 {
     /// <summary>
     /// Gets or sets a value indicating whether the API response represents a full sync.
@@ -22,6 +23,12 @@ public class GetTaskUpdatesApiResults
     public DateTimeOffset FullSyncDateUtc { get; set; }
 
     /// <summary>
+    /// Gets or sets the collection of project updates returned by the API.
+    /// </summary>
+    [JsonPropertyName("projects")]
+    public IReadOnlyCollection<ProjectUpdate> ProjectUpdates { get; set; } = [];
+
+    /// <summary>
     /// Gets or sets the collection of item updates returned by the API.
     /// </summary>
     [JsonPropertyName("items")]
@@ -33,8 +40,10 @@ public class GetTaskUpdatesApiResults
     [JsonPropertyName("sync_token")]
     public required string SyncToken { get; set; }
 
-    // 2 Additional properties exist on the API response,
-    // sync_status and temp_id_mapping
-    // but are unlikely to be required for this implementation
-    // so are not included here
+    /// <summary>
+    /// Any other elements in the payload not specifically assigned 
+    /// to properties in this class will be captured here as a dictionary of JSON elements.
+    /// </summary>
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> Other { get; } = [];
 }
