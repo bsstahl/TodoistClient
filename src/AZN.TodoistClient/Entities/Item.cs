@@ -119,4 +119,24 @@ public class Item
     /// A stored embedding for the item (if used by the application).
     /// </summary>
     public Embedding? Embedding { get; set; }
+
+    /// <summary>
+    /// Indicates whether the item is a recurring task (i.e. has a due date that is recurring).
+    /// </summary>
+    public bool IsRecurring => this.Due?.IsRecurring ?? false;
+
+    private static IEnumerable<string> DailyRecurringPatterns => new List<string>()
+    {
+        "every day",
+        "every! day",
+        "every 1 day",
+        "every! 1 day"
+    };
+
+    /// <summary>
+    /// Indicates whether the item is a daily recurring task.
+    /// </summary>
+    public bool IsDailyRecurring => 
+        this.IsRecurring 
+        && Item.DailyRecurringPatterns.Contains(this.Due!.Description);
 }

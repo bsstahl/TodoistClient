@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AZN.TodoistClient.IntegrationTest;
 
@@ -11,7 +12,7 @@ public class Engine_GetAllTasks_Should
             .AddUserSecrets<Engine_GetAllTasks_Should>()
             .Build();
 
-        var engine = new Engine(config);
+        var engine = new Engine(NullLogger<Engine>.Instance, config);
         var result = await engine.GetAllTasks();
 
         Assert.NotNull(result);

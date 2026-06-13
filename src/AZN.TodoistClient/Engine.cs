@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using AZN.TodoistClient.Entities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace AZN.TodoistClient;
 
@@ -17,6 +18,8 @@ public class Engine : IDisposable
 
     private readonly HttpClient _client;
     private readonly IConfiguration _config;
+    private readonly ILogger<Engine> _logger;
+    private readonly JsonSerializerOptions _serializerOptions;
 
     private bool disposedValue;
 
@@ -25,9 +28,18 @@ public class Engine : IDisposable
     /// <summary>
     /// The default public constructor for the client
     /// </summary>
-    public Engine(IConfiguration config)
+    public Engine(ILogger<Engine> logger, IConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+        ArgumentNullException.ThrowIfNull(config, nameof(config));
+
+        _logger = logger;
         _config = config;
+
+        _serializerOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault
+        };
 
         _client = new HttpClient()
         {
@@ -118,6 +130,33 @@ public class Engine : IDisposable
         } while (nextCursor is not null);
 
         return allProjects;
+    }
+
+    /// <summary>
+    /// Updates a task in the Todoist API using the provided ItemUpdate object. 
+    /// The Id property of the ItemUpdate must be set to the ID of the task to update.
+    /// </summary>
+    /// <param name="itemUpdate">The ItemUpdate object containing the updated task information.</param>
+    public async Task UpdateTask(Entities.ItemUpdate itemUpdate)
+    {
+        ArgumentNullException.ThrowIfNull(itemUpdate, nameof(itemUpdate));
+        var jsonContent = JsonSerializer.Serialize(itemUpdate, _serializerOptions);
+        var urlPath = $"tasks/{itemUpdate.Id}";
+        using var request = new HttpRequestMessage(HttpMethod.Post, urlPath)
+        {
+            Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json")
+        };
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+        _logger.LogTrace("Updating task with ID {TaskId} using URL {UrlPath} and payload:\r\n\r\n{Payload}\r\n\r\n",
+            itemUpdate.Id, urlPath, jsonContent);
+        var response = await _client.SendAsync(request).ConfigureAwait(false);
+        _logger.LogTrace("Response received from http request: {Response}", response);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+
+        response.EnsureSuccessStatusCode();
     }
 
     #endregion

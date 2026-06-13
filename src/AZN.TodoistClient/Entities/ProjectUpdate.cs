@@ -31,11 +31,11 @@ public class ProjectUpdate
 
     /// <summary>Timestamp when the project was created.</summary>
     [JsonPropertyName("created_at")]
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
 
     /// <summary>User id of the creator.</summary>
     [JsonPropertyName("creator_uid")]
-    public required string CreatorUid { get; set; }
+    public string? CreatorUid { get; set; }
 
     /// <summary>Default ordering value for tasks in the project.</summary>
     [JsonPropertyName("default_order")]
@@ -99,7 +99,7 @@ public class ProjectUpdate
 
     /// <summary>Timestamp when the project was last updated.</summary>
     [JsonPropertyName("updated_at")]
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>View style for the project (e.g., list, board).</summary>
     [JsonPropertyName("view_style")]

@@ -38,6 +38,18 @@ public class Project
     public int Order { get; set; }
 
     /// <summary>
+    /// Whether the project has been archived.
+    /// </summary>
+    [JsonPropertyName("is_archived")]
+    public bool IsArchived { get; set; }
+
+    /// <summary>
+    /// Whether the project has been deleted.
+    /// </summary>
+    [JsonPropertyName("is_deleted")]
+    public bool IsDeleted { get; set; }
+
+    /// <summary>
     /// Whether the project is shared.
     /// </summary>
     [JsonPropertyName("is_shared")]

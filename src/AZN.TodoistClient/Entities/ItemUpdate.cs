@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace AZN.TodoistClient.Entities;
 
@@ -13,7 +14,7 @@ public class ItemUpdate
 
     /// <summary>UID of the user who added the item.</summary>
     [JsonPropertyName("added_by_uid")]
-    public required string AddedByUid { get; set; }
+    public string? AddedByUid { get; set; }
 
     /// <summary>UID of the user who assigned the item (if any).</summary>
     [JsonPropertyName("assigned_by_uid")]
@@ -44,8 +45,20 @@ public class ItemUpdate
     public int DayOrder { get; set; }
 
     /// <summary>Deadline information for the item.</summary>
-    [JsonPropertyName("deadline")]
+    [JsonIgnore]
     public Deadline? Deadline { get; set; }
+
+    /// <summary>
+    /// Deadline date in "yyyy-MM-dd" format, extracted from the Deadline property if it exists.
+    /// </summary>
+    [JsonPropertyName("deadline_date")]
+    public string? DeadlineDate => this.Deadline?.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Deadline language code (e.g., "en", "fr"), extracted from the Deadline property if it exists.
+    /// </summary>
+    [JsonPropertyName("deadline_lang")]
+    public string? DeadlineLang => this.Deadline?.Lang;
 
     /// <summary>Detailed description for the item.</summary>
     [JsonPropertyName("description")]
@@ -61,7 +74,7 @@ public class ItemUpdate
 
     /// <summary>List of goal IDs associated with the item.</summary>
     [JsonPropertyName("goal_ids")]
-    public IReadOnlyCollection<string> GoalIds { get; set; } = [];
+    public IReadOnlyCollection<string>? GoalIds { get; set; }
 
     /// <summary>Item identifier.</summary>
     [JsonPropertyName("id")]
@@ -77,7 +90,7 @@ public class ItemUpdate
 
     /// <summary>Label IDs attached to the item.</summary>
     [JsonPropertyName("labels")]
-    public IReadOnlyCollection<string> Labels { get; set; } = [];
+    public IReadOnlyCollection<string>? Labels { get; set; }
 
     /// <summary>Number of notes attached to the item.</summary>
     [JsonPropertyName("note_count")]
@@ -89,7 +102,7 @@ public class ItemUpdate
 
     /// <summary>Priority level of the item.</summary>
     [JsonPropertyName("priority")]
-    public int Priority { get; set; }
+    public required int Priority { get; set; }
 
     /// <summary>Identifier of the project containing the item.</summary>
     [JsonPropertyName("project_id")]
@@ -105,9 +118,30 @@ public class ItemUpdate
 
     /// <summary>Last update time for the item.</summary>
     [JsonPropertyName("updated_at")]
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>UID of the owning user.</summary>
     [JsonPropertyName("user_id")]
     public required string UserId { get; set; }
+
+    /// <summary>
+    /// Creates an ItemUpdate instance from a given Item instance.
+    /// Populating only the required fields. Any additional fields
+    /// should be set manually on the ItemUpdate instance.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static ItemUpdate FromItem(Item item)
+    {
+        ArgumentNullException.ThrowIfNull(item, nameof(item));
+        return new ItemUpdate
+        {
+            Id = item.Id ?? throw new ArgumentException(nameof(Item.Id)),
+            ProjectId = item.ProjectId,
+            Content = item.Content,
+            Priority = item.Priority,
+            UserId = item.UserId
+        };
+    }
 }
