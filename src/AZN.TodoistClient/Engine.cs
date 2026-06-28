@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using AZN.TodoistClient.Entities;
+using AZN.TodoistClient.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -9,7 +10,7 @@ namespace AZN.TodoistClient;
 /// The primary client. Use this object as the foundation for all
 /// interactions with the Todoist API
 /// </summary>
-public class Engine : IDisposable
+public class Engine : IManageTasks, IDisposable
 {
     /// <summary>
     /// The URL used by the client to interact with the Todoist API
@@ -89,7 +90,7 @@ public class Engine : IDisposable
 
         var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         var result = JsonSerializer.Deserialize<GetSyncApiResults>(json);
-        return result ?? new GetSyncApiResults() { SyncToken = string.Empty }; 
+        return result ?? new GetSyncApiResults() { SyncToken = string.Empty };
     }
 
     /// <summary>
@@ -165,7 +166,7 @@ public class Engine : IDisposable
 
     private string GetApiToken()
     {
-        return _config["TODOIST_API_TOKEN"] 
+        return _config["TODOIST_API_TOKEN"]
             ?? throw new InvalidOperationException("API token not found in configuration.");
     }
 
