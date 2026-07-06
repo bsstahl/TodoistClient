@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace AZN.TodoistClient.Entities;
 
@@ -133,10 +134,53 @@ public class Item
         "every! 1 day"
     };
 
+    private static IEnumerable<string> WeeklyRecurringPatterns => new List<string>()
+    {
+        "every mon",
+        "every tue",
+        "every wed",
+        "every thu",
+        "every fri",
+        "every sat",
+        "every sun",
+        "every monday",
+        "every tuesday",
+        "every wednesday",
+        "every thursday",
+        "every friday",
+        "every saturday",
+        "every sunday",
+        "every! mon",
+        "every! tue",
+        "every! wed",
+        "every! thu",
+        "every! fri",
+        "every! sat",
+        "every! sun",
+        "every! monday",
+        "every! tuesday",
+        "every! wednesday",
+        "every! thursday",
+        "every! friday",
+        "every! saturday",
+        "every! sunday",
+        "every week",
+        "every! week",
+        "every 1 week",
+        "every! 1 week"
+    };
+
     /// <summary>
     /// Indicates whether the item is a daily recurring task.
     /// </summary>
-    public bool IsDailyRecurring => 
-        this.IsRecurring 
-        && Item.DailyRecurringPatterns.Contains(this.Due!.Description);
+    public bool IsDailyRecurring =>
+        this.IsRecurring
+        && Item.DailyRecurringPatterns.Contains(this.Due!.Description?.ToLower(CultureInfo.CurrentCulture));
+
+    /// <summary>
+    /// Indicates whether the item is a daily recurring task.
+    /// </summary>
+    public bool IsWeeklyRecurring =>
+        this.IsRecurring
+        && Item.WeeklyRecurringPatterns.Contains(this.Due!.Description?.ToLower(CultureInfo.CurrentCulture));
 }
