@@ -114,6 +114,40 @@ public class Engine : IManageTasks, IDisposable
     }
 
     /// <summary>
+    /// Imports tasks from a JSON file.
+    /// </summary>
+    /// <param name="filePath">The path of the file containing the tasks.</param>
+    /// <returns>A task that resolves to the imported tasks.</returns>
+    public static async Task<IEnumerable<Entities.Item>> ImportTasks(string filePath)
+    {
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+
+        var allTasks = new List<Entities.Item>();
+
+        // Read tasks from the specified file (assuming JSON format)
+        var json = await File.ReadAllTextAsync(filePath).ConfigureAwait(false);
+        var tasks = JsonSerializer.Deserialize<IEnumerable<Entities.Item>>(json);
+        if (tasks is not null)
+            allTasks.AddRange(tasks);
+
+        return allTasks;
+    }
+
+    /// <summary>
+    /// Exports the specified tasks to a JSON file.
+    /// </summary>
+    /// <param name="tasks">The tasks to export.</param>
+    /// <param name="filePath">The path of the file to create.</param>
+    public async Task ExportTasks(IEnumerable<Entities.Item> tasks, string filePath)
+    {
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+        ArgumentNullException.ThrowIfNull(tasks, nameof(tasks));
+
+        var json = JsonSerializer.Serialize(tasks, _serializerOptions);
+        await File.WriteAllTextAsync(filePath, json).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Retrieves all projects from the Todoist API by paging through results until all results have been retrieved.
     /// </summary>
     /// <returns>A task that resolves to an IEnumerable of Project containing all projects.</returns>
